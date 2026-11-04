@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: LedgerLite API
+  version: 1.0.0
+servers:
+  - url: https://api.ledgerlite.example
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Invoice:
+      type: object
+      properties:
+        id: { type: string }
+        customerId: { type: string }
+        amountCents: { type: integer }
+        currency: { type: string }
+        status: { type: string, enum: [open, paid, void] }
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      security: []
+      responses:
+        "200": { description: OK }
+  /invoices:
+    get:
+      responses:
+        "200":
+          description: Invoices for the caller's merchant
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Invoice" }
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Invoice" }
+      responses:
+        "201": { description: Created }
+  /invoices/{id}/pdf:
+    get:
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Link to the invoice PDF }
+        "404": { description: Not found }
